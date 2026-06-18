@@ -1,0 +1,44 @@
+spring:
+  application.name: midnight-deal
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/deal?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${DB_USER:deal}
+    password: ${DB_PASSWORD:deal}
+    hikari:
+      maximum-pool-size: 30   # 버스트(500~1000 TPS) 대부분을 Redis가 흡수 → 작은 DB 풀로 충분
+      minimum-idle: 10        # 세일 오픈 직전 워밍업 유지로 콜드 스타트 지연 방지
+      connection-timeout: 2000 # 풀 고갈 시 빠른 실패(2s) — 무한 대기로 스레드 점유 방지
+  jpa:
+    hibernate.ddl-auto: validate
+    open-in-view: false
+    properties.hibernate.format_sql: true
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 500ms          # command timeout — fail fast when Redis is down
+      connect-timeout: 500ms  # connection establish timeout
+
+server:
+  port: ${SERVER_PORT:8080}
+
+management:
+  endpoints.web.exposure.include: health,info
+  endpoint.health.show-details: always
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      redisStock:
+        sliding-window-size: 20
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 5s
+        permitted-number-of-calls-in-half-open-state: 3
+
+app:
+  instance-id: ${INSTANCE_ID:local}
+  stock:
+    fallback-enabled: true   # Redis 장애 시 DB락 경로 degrade

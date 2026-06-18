@@ -1,0 +1,24 @@
+# PDF 등 외부 문서
+*.pdf
+
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Java
+*.class
+*.log
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.factorypath
+.settings/
+bin/
+
+# OS
+.DS_Store

@@ -1,0 +1,9 @@
+.git
+build
+.gradle
+bin
+.idea
+.settings
+*.pdf
+docs
+k6
